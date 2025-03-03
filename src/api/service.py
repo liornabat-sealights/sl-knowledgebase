@@ -33,47 +33,6 @@ class ApiService:
         self.rag_service: Union[RAGService, None] = None
         self.logger = get_logger("api")
 
-        # Ensure web directories exist
-        self._ensure_web_directories()
-
-    def _ensure_web_directories(self):
-        """Create web directories if they don't exist"""
-        web_dir = "./web"
-        assets_dir = os.path.join(web_dir, "assets")
-
-        if not os.path.exists(web_dir):
-            self.logger.warning(
-                f"Web directory '{web_dir}' does not exist. Creating it."
-            )
-            os.makedirs(web_dir, exist_ok=True)
-
-        if not os.path.exists(assets_dir):
-            self.logger.warning(
-                f"Assets directory '{assets_dir}' does not exist. Creating it."
-            )
-            os.makedirs(assets_dir, exist_ok=True)
-
-        # Create a basic index.html if it doesn't exist
-        index_path = os.path.join(web_dir, "index.html")
-        if not os.path.exists(index_path):
-            self.logger.warning(
-                "index.html not found in web directory. Creating a basic one."
-            )
-            with open(index_path, "w") as f:
-                f.write("""<!DOCTYPE html>
-<html>
-<head>
-    <title>RAG Service</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body>
-    <h1>RAG Service</h1>
-    <p>The API is running. Use the API endpoints to interact with the service.</p>
-    <p>If you're seeing this page, the frontend application has not been built or deployed correctly.</p>
-</body>
-</html>""")
-
     def init(self, rag_service: RAGService):
         try:
             self.rag_service = rag_service
@@ -123,10 +82,6 @@ class ApiService:
         try:
             # Log directory contents to help with debugging
             self.logger.info(f"Current directory: {os.getcwd()}")
-            if os.path.exists("./web/"):
-                self.logger.info(f"Web directory content: {os.listdir('./web/')}")
-            else:
-                self.logger.warning("Web directory not found!")
 
             config = uvicorn.Config(
                 self.app,
