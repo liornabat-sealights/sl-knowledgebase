@@ -1,6 +1,6 @@
 import os
 import asyncio
-from typing import AsyncIterator
+from typing import AsyncIterator, Dict
 from typing import List
 from functools import partial
 from src.rag_service.config import Config
@@ -384,6 +384,37 @@ class RAGService:
         except Exception as e:
             self.logger.error(f"Failed to get document content: {str(e)}")
             raise
+
+    async def get_quick_questions(self) -> List[Dict[str, str]]:
+        """
+        Get the configured quick questions
+        
+        Returns:
+            List[Dict[str, str]]: List of quick question objects with id and text
+        """
+        try:
+            # Get questions from configuration
+            config_questions = self.config.quick_questions
+            
+            # Ensure all questions have id and text fields
+            formatted_questions = []
+            for i, q in enumerate(config_questions):
+                if isinstance(q, dict):
+                    # Ensure minimum required fields
+                    question_id = q.get('id', f'q{i+1}')
+                    question_text = q.get('text', '')
+                    
+                    if question_text:  # Only add if text is not empty
+                        formatted_questions.append({
+                            'id': question_id,
+                            'text': question_text
+                        })
+            
+            return formatted_questions
+        except Exception as e:
+            self.logger.error(f"Error retrieving quick questions: {e}")
+            # Return empty list on error instead of throwing
+            return []
 
     async def visualize(self) -> str:
         async with self.knowledge_base_status_lock:

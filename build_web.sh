@@ -39,4 +39,5 @@ cd ../ || exit 1  # Go back to the root directory
 git add src/web
 echo "src/web folder has been staged in git"
 
-echo "Web rebuild completed successfully!" 
+echo "Web rebuild completed successfully!"
+echo "Note: If you've modified quick questions configuration, you may need to restart the backend API service for changes to take effect." 

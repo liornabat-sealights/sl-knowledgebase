@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Optional, List, Dict
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -105,6 +105,49 @@ class Config(BaseSettings):
         default_factory=lambda: os.getenv("INDEX_LLM_MODEL", "gpt4o"),
         description="Index LLM model",
     )
+
+    # Quick Questions configuration
+    quick_questions_str: str = Field(
+        default_factory=lambda: os.getenv(
+            "QUICK_QUESTIONS", 
+            "How do I integrate Sealights Java Agent?,How to set up Cucumber.js with Sealights Node Agent?,What is LabId and how can I use it?,What is TIA and how can I use it?"
+        ),
+        description="Comma-separated list of quick questions to show in chat UI"
+    )
+
+    @property
+    def quick_questions(self) -> List[Dict[str, str]]:
+        """Parse quick questions from comma-separated string"""
+        try:
+            if not self.quick_questions_str:
+                return []
+                
+            # For backward compatibility
+            if os.getenv("QUICK_QUESTION_1"):
+                legacy_questions = []
+                for i in range(1, 10):  # Support up to 10 legacy questions
+                    env_var = f"QUICK_QUESTION_{i}"
+                    if os.getenv(env_var):
+                        legacy_questions.append({
+                            "id": f"q{i}",
+                            "text": os.getenv(env_var)
+                        })
+                if legacy_questions:
+                    return legacy_questions
+            
+            # Parse comma-separated questions
+            questions = []
+            for i, question_text in enumerate(self.quick_questions_str.split(',')):
+                question_text = question_text.strip()
+                if question_text:  # Skip empty questions
+                    questions.append({
+                        "id": f"q{i+1}",
+                        "text": question_text
+                    })
+            return questions
+        except Exception as e:
+            print(f"Error parsing quick questions: {e}")
+            return []
 
     # Pydantic settings configuration
     model_config = SettingsConfigDict(

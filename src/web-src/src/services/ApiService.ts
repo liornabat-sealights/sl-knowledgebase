@@ -338,6 +338,41 @@ class ApiService {
             throw error;
         }
     }
+
+    /**
+     * Get quick questions configured for the application
+     * @returns {Promise<Array<{id: string, text: string}>>} Array of quick question objects
+     */
+    async getQuickQuestions(): Promise<Array<{id: string, text: string}>> {
+        try {
+            const response = await fetch(`${API_URL}/quick-questions`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: isDevelopment ? "include" : "same-origin",
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch quick questions: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            
+            // Ensure we return an array
+            if (Array.isArray(data)) {
+                return data;
+            } else if (data && typeof data === 'object' && 'questions' in data && Array.isArray(data.questions)) {
+                return data.questions;
+            } else {
+                console.error("Unexpected quick questions format:", data);
+                return [];
+            }
+        } catch (error) {
+            console.error(`Error fetching quick questions: ${error}`);
+            return []; // Return empty array on error instead of throwing
+        }
+    }
 }
 // Export a singleton instance
 export const apiService = new ApiService();

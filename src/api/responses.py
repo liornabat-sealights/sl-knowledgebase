@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Dict, List, Optional, Any, Union
 
 from src.api.types import KnowledgeBaseModel
 
@@ -15,3 +16,8 @@ class OperationResponse(BaseModel):
 
 class TranscriptionResponse(BaseModel):
     text: str
+
+
+class QuickQuestionsResponse(BaseModel):
+    """Response containing quick questions for the chat UI"""
+    questions: List[Dict[str, str]]

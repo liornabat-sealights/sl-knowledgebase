@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict
+from typing import Dict, List, Optional, Any
+from pydantic import BaseModel
 
 from src.rag_service.types import (
     RAGDocModel,
@@ -84,3 +85,14 @@ class KnowledgeBaseModel:
                 for doc_id, doc in docs.docs.items()
             },
         )
+
+
+class QuickQuestion(BaseModel):
+    """Quick question model for suggestions in the chat UI"""
+    id: str
+    text: str
+
+
+class QuickQuestionsConfig(BaseModel):
+    """Configuration for quick questions feature"""
+    questions: List[QuickQuestion]

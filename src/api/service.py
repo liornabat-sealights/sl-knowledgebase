@@ -1,7 +1,7 @@
 import asyncio
 import os
 import uvicorn
-from typing import Union
+from typing import Union, List, Dict
 import tempfile
 from fastapi import FastAPI, APIRouter, Request, status
 from fastapi.staticfiles import StaticFiles
@@ -14,6 +14,7 @@ from src.api.responses import (
     KnowledgeBaseResponse,
     OperationResponse,
     TranscriptionResponse,
+    QuickQuestionsResponse,
 )
 from src.rag_service.service import RAGService
 from src.rag_service.types import QueryParameters
@@ -450,6 +451,51 @@ class ApiService:
             except Exception as e:
                 self.logger.error(f"Error deleting document: {str(e)}")
                 raise HTTPException(status_code=500, detail=str(e))
+
+        @self.router.get(
+            "/api/quick-questions",
+            response_model=List[Dict[str, str]],
+            status_code=status.HTTP_200_OK,
+            tags=["Quick Questions"],
+            summary="Get Quick Questions",
+            response_description="Returns the configured quick questions"
+        )
+        async def get_quick_questions():
+            try:
+                # Get questions from the RAG service
+                questions = await self.rag_service.get_quick_questions()
+                
+                # Ensure each question has id and text properties
+                validated_questions = []
+                for idx, question in enumerate(questions):
+                    # Validate that the question has the required structure
+                    if isinstance(question, dict) and 'id' in question and 'text' in question:
+                        validated_questions.append(question)
+                    else:
+                        # Try to construct a valid question object
+                        try:
+                            if isinstance(question, dict) and 'text' in question and question['text']:
+                                # Question has text but missing id
+                                validated_questions.append({
+                                    'id': question.get('id', f'q{idx+1}'),
+                                    'text': question['text']
+                                })
+                            elif isinstance(question, str) and question:
+                                # Question is just a string
+                                validated_questions.append({
+                                    'id': f'q{idx+1}',
+                                    'text': question
+                                })
+                        except Exception as e:
+                            self.logger.error(f"Error validating question {idx}: {e}")
+                
+                return validated_questions
+            except Exception as e:
+                self.logger.error(f"Error getting quick questions: {e}")
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=str(e)
+                )
 
         @self.app.exception_handler(RequestValidationError)
         async def validation_exception_handler(
