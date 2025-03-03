@@ -4,6 +4,7 @@
 # 1. Delete the content of src/web
 # 2. Build the React project in src/web-src
 # 3. Copy the build output to src/web
+# 4. Add src/web to git
 
 # Print each command before executing it
 set -x
@@ -31,5 +32,11 @@ fi
 # 3. Copy the build output from dist to src/web
 echo "Copying build output to src/web..."
 cp -R dist/* ../web/
+
+# 4. Add src/web to git
+echo "Adding src/web folder to git..."
+cd ../ || exit 1  # Go back to the root directory
+git add src/web
+echo "src/web folder has been staged in git"
 
 echo "Web rebuild completed successfully!" 

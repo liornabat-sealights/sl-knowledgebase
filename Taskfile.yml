@@ -24,7 +24,7 @@ tasks:
 
   build-web:
     cmds:
-      - sh ./rebuild_web.sh
+      - sh ./build_web.sh
   lint:
     cmds:
       - ruff format
