@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { format } from 'date-fns';
-import { Eye, Trash2 } from 'lucide-react';
+import { Eye, Trash2, ChevronUp, ChevronDown, Filter } from 'lucide-react';
 import { Button } from '@/ui/button';
 import {
     Table,
@@ -26,9 +26,19 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/ui/alert-dialog";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/ui/popover";
+import { Checkbox } from "@/ui/checkbox";
 import StatusIndicator, { StatusType } from '@/components/chat/components/StatusIndicator.tsx';
-import { KnowledgeBaseDocModel } from '@/models/ApiModels';
+import { KnowledgeBaseDocModel, KnowledgeBaseDocStatus } from '@/models/ApiModels';
 import { formatBytes } from '../utils/formatters';
+
+// Define sort types
+type SortField = 'file_name' | 'created_at' | 'updated_at' | 'content_length' | null;
+type SortDirection = 'asc' | 'desc';
 
 interface DocumentTableProps {
     documents: KnowledgeBaseDocModel[];
@@ -40,29 +50,210 @@ interface DocumentTableProps {
 }
 
 const DocumentTable: React.FC<DocumentTableProps> = ({
-                                                         documents,
-                                                         currentPage,
-                                                         itemsPerPage,
-                                                         onView,
-                                                         onDelete,
-                                                         isIndexing = false
-                                                     }) => {
+    documents,
+    currentPage,
+    itemsPerPage,
+    onView,
+    onDelete,
+    isIndexing = false
+}) => {
+    // State for sorting
+    const [sortField, setSortField] = useState<SortField>(null);
+    const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+    
+    // State for status filtering
+    const [statusFilters, setStatusFilters] = useState<KnowledgeBaseDocStatus[]>([]);
+    const [statusFilterOpen, setStatusFilterOpen] = useState(false);
+    
+    // All possible statuses from the KnowledgeBaseDocStatus type
+    const allStatuses: KnowledgeBaseDocStatus[] = [
+        "Unknown",
+        "Not Indexed",
+        "In Progress", 
+        "Indexed",
+        "Index Failed"
+    ];
+    
+    // Handle sorting
+    const handleSort = (field: SortField) => {
+        if (sortField === field) {
+            // Toggle direction if clicking the same field
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+        } else {
+            // Set new sort field and default to ascending
+            setSortField(field);
+            setSortDirection('asc');
+        }
+    };
+    
+    // Handle status filter toggling
+    const toggleStatusFilter = (status: KnowledgeBaseDocStatus) => {
+        setStatusFilters(prev => {
+            if (prev.includes(status)) {
+                return prev.filter(s => s !== status);
+            } else {
+                return [...prev, status];
+            }
+        });
+    };
+    
+    // Filter and sort documents
+    const processedDocuments = useMemo(() => {
+        // First apply filters
+        let filtered = [...documents];
+        
+        if (statusFilters.length > 0) {
+            filtered = filtered.filter(doc => statusFilters.includes(doc.status));
+        }
+        
+        // Then sort
+        if (sortField) {
+            filtered.sort((a, b) => {
+                let valueA, valueB;
+                
+                // Extract the values to compare based on the sort field
+                switch (sortField) {
+                    case 'file_name':
+                        valueA = a.file_name.toLowerCase();
+                        valueB = b.file_name.toLowerCase();
+                        break;
+                    case 'created_at':
+                        valueA = new Date(a.created_at).getTime();
+                        valueB = new Date(b.created_at).getTime();
+                        break;
+                    case 'updated_at':
+                        valueA = new Date(a.updated_at).getTime();
+                        valueB = new Date(b.updated_at).getTime();
+                        break;
+                    case 'content_length':
+                        valueA = a.content_length;
+                        valueB = b.content_length;
+                        break;
+                    default:
+                        return 0;
+                }
+                
+                // Compare and apply sort direction
+                if (valueA < valueB) {
+                    return sortDirection === 'asc' ? -1 : 1;
+                }
+                if (valueA > valueB) {
+                    return sortDirection === 'asc' ? 1 : -1;
+                }
+                return 0;
+            });
+        }
+        
+        return filtered;
+    }, [documents, sortField, sortDirection, statusFilters]);
+    
+    // Render sort icon based on current sort state
+    const renderSortIcon = (field: SortField) => {
+        if (sortField !== field) {
+            return null;
+        }
+        return sortDirection === 'asc' ? <ChevronUp className="h-4 w-4 ml-1" /> : <ChevronDown className="h-4 w-4 ml-1" />;
+    };
+    
     return (
         <div className="w-full overflow-hidden">
             <Table>
                 <TableHeader>
                     <TableRow>
                         <TableHead className="w-10 text-center">#</TableHead>
-                        <TableHead className="w-20">Status</TableHead>
-                        <TableHead>Document Name</TableHead>
-                        <TableHead className="w-28 whitespace-nowrap">Upload Date</TableHead>
-                        <TableHead className="w-28 whitespace-nowrap">Last Updated</TableHead>
-                        <TableHead className="w-16 whitespace-nowrap">Size</TableHead>
+                        
+                        {/* Status column with filter */}
+                        <TableHead className="w-20">
+                            <div className="flex items-center space-x-1">
+                                <span>Status</span>
+                                <Popover open={statusFilterOpen} onOpenChange={setStatusFilterOpen}>
+                                    <PopoverTrigger asChild>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className={`h-5 w-5 p-0 ${statusFilters.length > 0 ? 'text-primary' : 'text-muted-foreground'}`}
+                                        >
+                                            <Filter className="h-4 w-4" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-56 p-2" align="start">
+                                        <div className="space-y-1">
+                                            <h4 className="font-medium text-sm mb-2">Filter by Status</h4>
+                                            {allStatuses.map((status) => (
+                                                <div key={status} className="flex items-center space-x-2">
+                                                    <Checkbox 
+                                                        id={`status-${status}`} 
+                                                        checked={statusFilters.includes(status)}
+                                                        onCheckedChange={() => toggleStatusFilter(status)}
+                                                    />
+                                                    <label 
+                                                        htmlFor={`status-${status}`} 
+                                                        className="text-sm cursor-pointer flex items-center"
+                                                    >
+                                                        <StatusIndicator 
+                                                            status={status as StatusType} 
+                                                            className="scale-75"
+                                                            showLabel={false}
+                                                        />
+                                                        <span className="ml-2">{status}</span>
+                                                    </label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                        </TableHead>
+                        
+                        {/* Document Name column with sorting */}
+                        <TableHead 
+                            className="cursor-pointer hover:text-foreground"
+                            onClick={() => handleSort('file_name')}
+                        >
+                            <div className="flex items-center">
+                                Document Name
+                                {renderSortIcon('file_name')}
+                            </div>
+                        </TableHead>
+                        
+                        {/* Upload Date column with sorting */}
+                        <TableHead 
+                            className="w-28 whitespace-nowrap cursor-pointer hover:text-foreground"
+                            onClick={() => handleSort('created_at')}
+                        >
+                            <div className="flex items-center">
+                                Upload Date
+                                {renderSortIcon('created_at')}
+                            </div>
+                        </TableHead>
+                        
+                        {/* Last Updated column with sorting */}
+                        <TableHead 
+                            className="w-28 whitespace-nowrap cursor-pointer hover:text-foreground"
+                            onClick={() => handleSort('updated_at')}
+                        >
+                            <div className="flex items-center">
+                                Last Updated
+                                {renderSortIcon('updated_at')}
+                            </div>
+                        </TableHead>
+                        
+                        {/* Size column with sorting */}
+                        <TableHead 
+                            className="w-16 whitespace-nowrap cursor-pointer hover:text-foreground"
+                            onClick={() => handleSort('content_length')}
+                        >
+                            <div className="flex items-center">
+                                Size
+                                {renderSortIcon('content_length')}
+                            </div>
+                        </TableHead>
+                        
                         <TableHead className="w-20 text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {documents.map((doc, index) => (
+                    {processedDocuments.map((doc, index) => (
                         <TableRow key={doc.id}>
                             <TableCell className="text-center font-mono text-sm text-muted-foreground">
                                 {(currentPage - 1) * itemsPerPage + index + 1}

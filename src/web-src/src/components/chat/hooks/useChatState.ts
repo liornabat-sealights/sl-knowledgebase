@@ -17,7 +17,7 @@ export const useChatState = () => {
     handleReply,
     handleClearReply,
     handleRegenerateResponse,
-    handleClearChat
+    handleNewChat
   } = useMessageHandler(kbStatus);
 
   const { selectedLLM, handleLLMChange } = useLLMSelector(updateMessages);
@@ -36,7 +36,7 @@ export const useChatState = () => {
     handleReply,
     handleClearReply,
     handleRegenerateResponse,
-    handleClearChat
+    handleNewChat
   };
 };
 

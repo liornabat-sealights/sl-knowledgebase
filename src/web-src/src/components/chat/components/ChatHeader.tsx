@@ -25,14 +25,14 @@ interface ChatHeaderProps {
   kbStatus: StatusType;
   selectedLLM: string;
   onLLMChange: (value: string) => void;
-  onClearChat: () => void;
+  onNewChat: () => void;
 }
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({
                                                  kbStatus,
                                                  selectedLLM,
                                                  onLLMChange,
-                                                 onClearChat
+                                                 onNewChat
                                                }) => {
   return (
       <div className="w-full mb-4 flex items-center justify-between">
@@ -65,15 +65,15 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                 <Button
                     variant="outline"
                     size="sm"
-                    onClick={onClearChat}
+                    onClick={onNewChat}
                     className="flex items-center gap-1 h-8"
                 >
                   <RotateCcw className="h-4 w-4" />
-                  Clear Chat
+                  New Chat
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                Clear all chat messages
+                Start a new chat conversation
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

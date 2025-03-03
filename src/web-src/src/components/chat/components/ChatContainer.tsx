@@ -18,7 +18,7 @@ const ChatContainer: React.FC = () => {
         handleSendMessage,
         handleStopGeneration,
         handleRegenerateResponse,
-        handleClearChat,
+        handleNewChat,
         handleReply,
         handleClearReply
     } = useChatState();
@@ -32,7 +32,7 @@ const ChatContainer: React.FC = () => {
                         kbStatus={kbStatus}
                         selectedLLM={selectedLLM}
                         onLLMChange={handleLLMChange}
-                        onClearChat={handleClearChat}
+                        onNewChat={handleNewChat}
                     />
                 </div>
 

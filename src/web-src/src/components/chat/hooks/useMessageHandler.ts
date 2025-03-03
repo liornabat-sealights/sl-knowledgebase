@@ -304,7 +304,7 @@ export const useMessageHandler = (kbStatus: StatusType) => {
     await fetchResponse(previousQuery);
   };
 
-  const handleClearChat = () => {
+  const handleNewChat = () => {
     setMessages([
       {
         id: Date.now().toString(),
@@ -329,6 +329,6 @@ export const useMessageHandler = (kbStatus: StatusType) => {
     handleReply,
     handleClearReply,
     handleRegenerateResponse,
-    handleClearChat
+    handleNewChat
   };
 };
