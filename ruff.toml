@@ -1,0 +1,2 @@
+exclude = [".venv","web","test_scripts","archive","tests"]
+lint.ignore = ["E402"]

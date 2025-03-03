@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sealights CS Knowledge Base</title>
+  <meta property="og:image" content="/og-image.png" />
+  <script>
+    // Add debugging information to help diagnose loading issues
+    console.log("Document loading started");
+
+    // Display loading message in case JavaScript fails to load
+    document.addEventListener("DOMContentLoaded", function() {
+      console.log("DOM Content Loaded");
+      const root = document.getElementById("root");
+      if (root) {
+        root.innerHTML = '<div style="padding: 20px; font-family: sans-serif;">' +
+                '<h2>Loading application...</h2>' +
+                '<p>If this message persists, check the browser console for errors.</p>' +
+                '</div>';
+      }
+    });
+
+    // Log any script loading errors
+    window.addEventListener('error', function(e) {
+      console.error('Resource loading error:', e.target.src || e.target.href);
+    }, true);
+  </script>
+</head>
+
+<body>
+<div id="root"></div>
+<!-- Modified script tags with error handling -->
+<script src="https://cdn.gpteng.co/gptengineer.js" type="module" onerror="console.error('Failed to load gptengineer.js')"></script>
+<script type="module" src="/src/main.tsx" onerror="console.error('Failed to load main.tsx')"></script>
+</body>
+</html>

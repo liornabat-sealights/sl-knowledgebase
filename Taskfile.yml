@@ -1,0 +1,40 @@
+# github.com/go-task/task
+
+version: '3'
+
+vars:
+  IMAGE_NAME: sealights/sl-kb
+  VERSION: v0.0.1
+tasks:
+
+  docker:
+    cmds:
+      - task: build-web
+      - docker buildx build --platform linux/amd64 -t {{.IMAGE_NAME}}:{{.VERSION}} . --push
+      - docker pull --platform linux/amd64 {{.IMAGE_NAME}}:{{.VERSION}}
+      - docker tag {{.IMAGE_NAME}}:{{.VERSION}} {{.IMAGE_NAME}}:latest
+      - docker push {{.IMAGE_NAME}}:latest
+#      - trivy image --exit-code 1 --severity CRITICAL,HIGH {{.IMAGE_NAME}}:{{.VERSION}}
+  trivy:
+    cmds:
+      - trivy image --exit-code 1 --severity HIGH,CRITICAL {{.IMAGE_NAME}}:{{.VERSION}}
+  docker-run:
+    cmds:
+      - docker run -it -p 9000:9000 --platform linux/amd64 -v $(pwd)/.env:/app/.env  -v $(pwd)/data:/app/data {{.IMAGE_NAME}}:{{.VERSION}}
+
+  build-web:
+    cmds:
+      - sh ./rebuild_web.sh
+  lint:
+    cmds:
+      - ruff format
+      - ruff check --fix
+  index:
+    cmds:
+#      - python cli.py clean
+      - python cli.py index
+      - python cli.py visualize
+      - open knowledge_graph.html
+  chat:
+    cmds:
+      - python main
