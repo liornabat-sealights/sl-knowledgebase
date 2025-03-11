@@ -20,7 +20,8 @@ const ChatContainer: React.FC = () => {
         handleRegenerateResponse,
         handleNewChat,
         handleReply,
-        handleClearReply
+        handleClearReply,
+        handleAddSelectionToReferences
     } = useChatState();
 
     return (
@@ -51,6 +52,7 @@ const ChatContainer: React.FC = () => {
                     onRegenerate={handleRegenerateResponse}
                     onStopGeneration={handleStopGeneration}
                     onReply={handleReply}
+                    onAddSelectionToReferences={handleAddSelectionToReferences}
                 />
             </div>
 

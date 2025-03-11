@@ -281,7 +281,48 @@ When handling relationships with timestamps:
 - If you don't know the answer, just say so.
 - Do not make anything up. Do not include information not provided by the Knowledge Base."""
 
-PROMPTS["keywords_extraction"] = """---Role---
+PROMPTS["keywords_extraction"] = """
+You are an AI assistant specialized in extracting and categorizing keywords from user queries and conversation history. Your task is to identify both high-level (overarching concepts or themes) and low-level (specific entities or details) keywords from the given input.
+
+Here is the relevant conversation history (if any):
+<conversation_history>
+{history}
+</conversation_history>
+
+Here is the user's query:
+<query>
+{query}
+</query>
+
+Please follow these steps to complete the task:
+
+1. Carefully read and analyze the conversation history and query.
+2. Inside <keyword_analysis> tags:
+   a. List all potential keywords from both the query and conversation history.
+   b. Categorize each keyword as either high-level or low-level.
+   c. Evaluate the relevance of each keyword to the query and conversation context.
+   d. Select the most relevant 3-6 keywords for each category.
+3. Based on your analysis, extract two sets of keywords:
+   a. High-level keywords: Focus on overarching concepts, themes, or main topics.
+   b. Low-level keywords: Focus on specific entities, technical terms, or concrete details.
+4. Ensure that the keywords are relevant to the query and any context provided in the conversation history.
+5. Format your response as a JSON object with two keys: "high_level_keywords" and "low_level_keywords". Each key should contain an array of string values.
+
+Keep in mind:
+- Aim for 5-8 keywords in each category, but adjust based on the complexity of the query.
+- Maintain the same language as the input query.
+- Ensure that the output is in human-readable text, not unicode characters.
+
+You can refer to the examples provided at the beginning of this prompt for guidance on the expected input and output format.
+
+<examples>
+{examples}
+</examples>
+
+
+"""
+
+PROMPTS["keywords_extraction_old"] = """---Role---
 
 You are a helpful assistant tasked with identifying both high-level and low-level keywords in the user's query and conversation history.
 
@@ -477,3 +518,114 @@ When handling information with timestamps:
 - If you don't know the answer, just say so. Do not make anything up.
 - Do not include information about the Data Sources.
 - Do not include information not provided by the Data Sources."""
+
+
+exterations="""
+You are an AI assistant specialized in extracting and categorizing keywords from user queries and conversation history. Your task is to identify both high-level (overarching concepts or themes) and low-level (specific entities or details) keywords from the given input.
+
+Here is the relevant conversation history (if any):
+<conversation_history>
+{history}
+</conversation_history>
+
+Here is the user's query:
+<query>
+{query}
+</query>
+
+Please follow these steps to complete the task:
+
+1. Carefully read and analyze the conversation history and query.
+2. Inside <keyword_analysis> tags:
+   a. List all potential keywords from both the query and conversation history.
+   b. Categorize each keyword as either high-level or low-level.
+   c. Evaluate the relevance of each keyword to the query and conversation context.
+   d. Select the most relevant 3-6 keywords for each category.
+3. Based on your analysis, extract two sets of keywords:
+   a. High-level keywords: Focus on overarching concepts, themes, or main topics.
+   b. Low-level keywords: Focus on specific entities, technical terms, or concrete details.
+4. Ensure that the keywords are relevant to the query and any context provided in the conversation history.
+5. Format your response as a JSON object with two keys: "high_level_keywords" and "low_level_keywords". Each key should contain an array of string values.
+
+Keep in mind:
+- Aim for 5-8 keywords in each category, but adjust based on the complexity of the query.
+- Maintain the same language as the input query.
+- Ensure that the output is in human-readable text, not unicode characters.
+
+You can refer to the examples provided at the beginning of this prompt for guidance on the expected input and output format.
+
+<examples>
+{examples}
+</examples>
+
+"""
+
+full_prompt="""
+You are an AI assistant specialized in extracting and categorizing keywords from user queries and conversation history. Your task is to identify both high-level (overarching concepts or themes) and low-level (specific entities or details) keywords from the given input.
+
+Here is the relevant conversation history (if any):
+<conversation_history>
+
+</conversation_history>
+
+
+
+Please follow these steps to complete the task:
+
+1. Carefully read and analyze the conversation history and query.
+2. Inside <keyword_analysis> tags:
+   a. List all potential keywords from both the query and conversation history.
+   b. Categorize each keyword as either high-level or low-level.
+   c. Evaluate the relevance of each keyword to the query and conversation context.
+   d. Select the most relevant 3-6 keywords for each category.
+3. Based on your analysis, extract two sets of keywords:
+   a. High-level keywords: Focus on overarching concepts, themes, or main topics.
+   b. Low-level keywords: Focus on specific entities, technical terms, or concrete details.
+4. Ensure that the keywords are relevant to the query and any context provided in the conversation history.
+5. Format your response as a JSON object with two keys: "high_level_keywords" and "low_level_keywords". Each key should contain an array of string values.
+
+Keep in mind:
+- Aim for 5-8 keywords in each category, but adjust based on the complexity of the query.
+- Maintain the same language as the input query.
+- Ensure that the output is in human-readable text, not unicode characters.
+
+You can refer to the examples provided at the beginning of this prompt for guidance on the expected input and output format.
+
+<examples>
+{examples}
+Example 1:
+
+Query: "How does TokenPermissionService handle different token access levels across applications?"
+################
+Output:
+{
+  "high_level_keywords": ["TokenPermissionService", "Token access levels", "Application security"],
+  "low_level_keywords": ["Global Access", "Creator Access", "Group-Based Access", "Legacy Token", "Token Type", "Security Contract"]
+}
+#############################
+Example 2:
+
+Query: "What are the functional test cases covering the token creation API endpoints?"
+################
+Output:
+{
+  "high_level_keywords": ["Functional Test Case", "Token creation", "API Endpoint"],
+  "low_level_keywords": ["Test Condition", "Test Action", "Test Expected Result", "Token Management Action", "API Version", "Coverage"]
+}
+#############################,
+Example 3:
+
+Query: "Which methods in the AuthenticationModule are not covered by unit tests?"
+################
+Output:
+{
+  "high_level_keywords": ["AuthenticationModule", "Method", "Unit Test Case", "Coverage"],
+  "low_level_keywords": ["File Path", "Class", "Interface", "Module", "Business Logic", "Test Suite"]
+}
+#############################
+
+Here is the user's query:
+<query>
+give me a list of agenets and how to install them
+</query>
+"""

@@ -102,6 +102,30 @@ export const useMessageHandler = (kbStatus: StatusType) => {
     setReplyContent(targetMessage.content);
   };
 
+  // Add selected text to references
+  const handleAddSelectionToReferences = (selectedText: string) => {
+    if (!selectedText) return;
+    
+    // Generate a unique ID for this reference
+    const messageId = `selection-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    
+    // Add the new reference to the array
+    setReplyReferences(prev => [
+      ...prev,
+      {
+        messageId,
+        content: selectedText,
+        timestamp: new Date(),
+        isUser: false // We assume selected text is from KB responses
+      }
+    ]);
+    
+    // Update reply content for backward compatibility (if this is the first reference)
+    if (replyReferences.length === 0) {
+      setReplyContent(selectedText);
+    }
+  };
+
   // Updated to allow removing individual references
   const handleClearReply = (messageId?: string) => {
     if (messageId) {
@@ -329,6 +353,7 @@ export const useMessageHandler = (kbStatus: StatusType) => {
     handleReply,
     handleClearReply,
     handleRegenerateResponse,
-    handleNewChat
+    handleNewChat,
+    handleAddSelectionToReferences
   };
 };

@@ -17,7 +17,8 @@ export const useChatState = () => {
     handleReply,
     handleClearReply,
     handleRegenerateResponse,
-    handleNewChat
+    handleNewChat,
+    handleAddSelectionToReferences
   } = useMessageHandler(kbStatus);
 
   const { selectedLLM, handleLLMChange } = useLLMSelector(updateMessages);
@@ -36,7 +37,8 @@ export const useChatState = () => {
     handleReply,
     handleClearReply,
     handleRegenerateResponse,
-    handleNewChat
+    handleNewChat,
+    handleAddSelectionToReferences
   };
 };
 

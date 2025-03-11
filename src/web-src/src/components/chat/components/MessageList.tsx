@@ -32,6 +32,7 @@ interface MessageListProps {
     onRegenerate: (previousQuery: string) => void;
     onStopGeneration: () => void;
     onReply?: (messageId: string) => void;
+    onAddSelectionToReferences?: (selectedText: string) => void;
 }
 
 const MessageList: React.FC<MessageListProps> = ({
@@ -40,7 +41,8 @@ const MessageList: React.FC<MessageListProps> = ({
                                                      streamingResponse,
                                                      onRegenerate,
                                                      onStopGeneration,
-                                                     onReply
+                                                     onReply,
+                                                     onAddSelectionToReferences
                                                  }) => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -141,6 +143,11 @@ const MessageList: React.FC<MessageListProps> = ({
                     onReply={
                         !message.isUser && !message.isHistory && onReply
                             ? () => onReply(message.id)
+                            : undefined
+                    }
+                    onAddSelectionToReferences={
+                        !message.isUser && onAddSelectionToReferences
+                            ? onAddSelectionToReferences
                             : undefined
                     }
                 />
